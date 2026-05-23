@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "497919357443",
+    "project_id": "twinsense-b3564",
+    "storage_bucket": "twinsense-b3564.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497919357443:android:ea320ab0dd4926e65d5436",
+        "android_client_info": {
+          "package_name": "com.example.twinsense_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAW03RdQxl_I4pdjtMcZGwHRRQ5upAtagQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

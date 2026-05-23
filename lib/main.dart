@@ -2,12 +2,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:fl_chart/fl_chart.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,6 +25,8 @@ class MyApp extends StatelessWidget {
 }
 
 class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
+
   @override
   _DashboardState createState() => _DashboardState();
 }
@@ -29,10 +38,53 @@ class _DashboardState extends State<Dashboard> {
   List<double> tempHistory = [];
   List<double> currentHistory = [];
 
+  @override
+void initState() {
+  super.initState();
+
+   FirebaseMessaging.instance.requestPermission();
+  // 🔥 TOKEN AL + BACKEND'E GÖNDER
+  FirebaseMessaging.instance.getToken().then((token) async {
+    print("🔥 TOKEN: $token");
+
+    if (token != null) {
+      try {
+        await http.post(
+          Uri.parse("https://twinsense-backend.onrender.com/api/token"),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode({
+            "token": token,
+          }),
+        );
+
+        print("✅ Token backend'e gönderildi");
+      } catch (e) {
+        print("❌ Token gönderme hatası: $e");
+      }
+    }
+  });
+
+  // 🔔 foreground bildirim
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print("📩 Bildirim geldi: ${message.notification?.title}");
+  });
+
+  fetchData();
+
+  Future.doWhile(() async {
+    await Future.delayed(Duration(seconds: 3));
+    if (!mounted) return false;
+    fetchData();
+    return true;
+  });
+}
+
   Future fetchData() async {
     try {
       final res = await http.get(
-        Uri.parse("http://127.0.0.1:5000/api/live"),
+        Uri.parse("https://twinsense-backend.onrender.com/api/live"),
       );
 
       if (res.statusCode == 200) {
@@ -57,20 +109,6 @@ class _DashboardState extends State<Dashboard> {
     } catch (e) {
       print("Hata: $e");
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    fetchData();
-
-    Future.doWhile(() async {
-      await Future.delayed(Duration(seconds: 3));
-      if (!mounted) return false;
-      fetchData();
-      return true;
-    });
   }
 
   Widget card(String title, String value, {Color? color}) {
