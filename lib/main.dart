@@ -37,31 +37,51 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
+  bool recoveryMode = false;
   @override
   void initState() {
     super.initState();
+
+    handleRecovery();
 
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       if (mounted) setState(() {});
     });
   }
 
+  Future<void> handleRecovery() async {
+    final uri = Uri.base;
+
+    if (uri.queryParameters.containsKey("code")) {
+      setState(() {
+        recoveryMode = true;
+      });
+
+      await Supabase.instance.client.auth.exchangeCodeForSession(
+        uri.toString(),
+      );
+
+      if (mounted) setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = Supabase.instance.client.auth.currentSession;
-    final hasCode = Uri.base.queryParameters.containsKey("code");
-    final type = Uri.base.queryParameters["type"];
+    final uri = Uri.base;
+    final hasCode = uri.queryParameters.containsKey("code");
 
-    if (hasCode && type == "recovery") {
+    if (recoveryMode || hasCode) {
       return ResetPasswordScreen(
         onDone: () async {
+          recoveryMode = false;
           await Supabase.instance.client.auth.signOut();
           if (mounted) setState(() {});
         },
       );
     }
 
-    if (session != null && !hasCode) {
+    if (session != null) {
       return const CampusScreen();
     }
 
