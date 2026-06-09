@@ -253,6 +253,13 @@ void initState() {
                           ? Colors.red
                           : null,
                     ),
+                    card(
+                      "🚶 Hareket",
+                      data["motion_detected"] == true ? "VAR" : "YOK",
+                      color: data["motion_detected"] == true
+                        ? Colors.green
+                        : null,
+                    ),
                   ],
                 ),
                 SizedBox(height: 20),
