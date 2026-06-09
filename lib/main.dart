@@ -658,6 +658,12 @@ class _SensorDetailScreenState extends State<SensorDetailScreen> {
               Icons.local_fire_department,
               Colors.redAccent,
             ),
+            metric(
+              "Hareket",
+              data["motion_detected"] == true ? "VAR" : "YOK",
+              Icons.directions_walk,
+             Colors.purpleAccent,
+            ),
           ],
         ),
         const SizedBox(height: 18),
